@@ -138,6 +138,7 @@
 
 <div class="button-container">
     <button id="scan-button">Сканировать</button>
+    <button id="manual-entry-button">Ввести вручную</button> <!-- Новая кнопка -->
     <button id="reset-button">Сброс</button>
 </div>
 
@@ -289,7 +290,12 @@
         document.getElementById('bounding-box').style.display = 'none'; // Скрыть рамку
     });
 
-    // Добавляем автозаполнение при вводе в поле
+    document.getElementById('manual-entry-button').addEventListener('click', function () {
+        const manualEntryField = document.getElementById('manual-entry');
+        manualEntryField.style.display = 'block'; // Показываем поле ввода
+        manualEntryField.focus(); // Устанавливаем фокус на поле ввода
+    });
+
     document.getElementById('manual-entry').addEventListener('input', function () {
         const input = this.value.trim();
         if (input.length > 0) {
