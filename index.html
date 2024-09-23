@@ -137,12 +137,12 @@
 
 <div class="button-container">
     <button id="scan-button">Сканировать</button>
-    <button id="manual-entry-button">Ввести вручную</button> <!-- Новая кнопка -->
+    <button id="manual-entry-button">Ввести вручную</button>
     <button id="reset-button">Сброс</button>
 </div>
 
-<input type="text" id="manual-entry" placeholder="Введите штрих-код для автозаполнения" list="barcode-list" /> <!-- Поле для ручного ввода -->
-<datalist id="barcode-list"></datalist> <!-- Дата-лист для автоподстановки -->
+<input type="text" id="manual-entry" placeholder="Введите штрих-код для автозаполнения" list="barcode-list" />
+<datalist id="barcode-list"></datalist>
 
 <div id="loading">Загрузка...</div>
 
@@ -225,7 +225,7 @@
         const outputColumns = Array.from(document.getElementById('output-columns').selectedOptions)
             .map(option => option.value);
         const resultsContainer = document.getElementById('search-results');
-        resultsContainer.innerHTML = `<p>Сканируемый штрих-код: ${barcode}</p>`;
+        resultsContainer.innerHTML = `<p>Сканируемый/вводимый штрих-код: ${barcode}</p>`;
 
         const filteredData = data.filter(item => item['ШК 1'] === barcode || item['ШК 2'] === barcode || item['ШК 3'] === barcode);
 
@@ -319,7 +319,17 @@
     });
 
     document.getElementById('manual-entry').addEventListener('input', function () {
-        populateDatalist(); // Обновляем список при вводе
+        const input = this.value.trim();
+        if (input.length > 0) {
+            populateDatalist(); // Обновляем список при вводе
+        }
+    });
+
+    document.getElementById('manual-entry').addEventListener('change', function () {
+        const barcode = this.value.trim();
+        if (barcode) {
+            searchByBarcode(barcode); // Выполняем поиск при изменении поля
+        }
     });
 
     loadGoogleSheetData();
