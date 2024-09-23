@@ -113,6 +113,20 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             cursor: pointer;
         }
+
+        .manual-input {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        #manual-barcode {
+            padding: 10px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 400px;
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
@@ -131,6 +145,11 @@
 <div class="button-container">
     <button id="scan-button">Сканировать</button>
     <button id="reset-button">Сброс</button>
+</div>
+
+<div class="manual-input">
+    <input type="text" id="manual-barcode" placeholder="Введите штрих-код вручную">
+    <button id="manual-button">Ввести вручную</button>
 </div>
 
 <div id="loading">Загрузка...</div>
@@ -268,16 +287,24 @@
     }
 
     document.getElementById('scan-button').addEventListener('click', function () {
-        loadGoogleSheetData().then(startScanner);
+        loadGoogleSheetData();
+        startScanner();
     });
 
     document.getElementById('reset-button').addEventListener('click', function () {
-        document.getElementById('search-results').innerHTML = '';
-        document.getElementById('bounding-box').style.display = 'none';
         Quagga.stop();
         isScanning = false;
+        document.getElementById('bounding-box').style.display = 'none';
+    });
+
+    document.getElementById('manual-button').addEventListener('click', function () {
+        const manualBarcode = document.getElementById('manual-barcode').value.trim();
+        if (manualBarcode) {
+            searchByBarcode(manualBarcode);
+        } else {
+            alert('Введите штрих-код вручную');
+        }
     });
 </script>
-
 </body>
 </html>
