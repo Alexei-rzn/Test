@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сканирование штрих-кода</title>
+    <script src="https://unpkg.com/quagga/dist/quagga.min.js"></script>
+    <style>
+        #scanner-container {
+            width: 100%;
+            max-width: 640px;
+            margin: 20px auto;
+        }
+        video {
+            width: 100%;
+        }
+        #result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Сканирование штрих-кода</h1>
+    <div id="scanner-container"></div>
+    <div id="result">
+        <p>Результат: <span id="barcode-result">—</span></p>
+    </div>
+
+    <script>
+        // Функция запуска камеры и сканера
+        function startScanner() {
+            Quagga.init({
+                inputStream: {
+                    type: "LiveStream",
+                    target: document.querySelector('#scanner-container'), // Вставляем поток видео в контейнер
+                    constraints: {
+                        width: 640,
+                        height: 480,
+                        facingMode: "environment" // Используем заднюю камеру
+                    },
+                },
+                decoder: {
+                    readers: ["ean_reader", "code_128_reader", "code_39_reader"] // Типы штрих-кодов для распознавания
+                }
+            }, function (err) {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                console.log("Scanner initialized");
+                Quagga.start(); // Запускаем сканер
+            });
+
+            Quagga.onDetected(function (data) {
+                const code = data.codeResult.code;
+                document.getElementById("barcode-result").innerText = code; // Выводим результат
+                console.log("Код штрих-кода: ", code);
+
+                // Останавливаем сканер после успешного сканирования
+                Quagga.stop();
+                
+                // После сканирования можно выполнить поиск по базе данных (например, через API или таблицу)
+                // Для повторного сканирования можно заново запустить Quagga.start()
+            });
+        }
+
+        // Запуск сканера при загрузке страницы
+        document.addEventListener("DOMContentLoaded", function () {
+            startScanner();
+        });
+    </script>
+</body>
+</html>
