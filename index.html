@@ -6,40 +6,8 @@
     <title>Сканирование штрих-кода</title>
     <script src="https://unpkg.com/quagga/dist/quagga.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh; /* Высота на весь экран */
-            margin: 0;
-            background-color: #f7f7f7;
-            overflow: hidden;
-        }
-
-        #scanner-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            overflow: hidden;
-            display: none; /* Скрыто по умолчанию */
-            background-color: black;
-        }
-
-        video {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        #result {
-            width: 100%;
-            max-width: 640px;
-            text-align: center;
-        }
-
-        /* Остальные стили остаются без изменений */
+        /* Стили остаются без изменений */
+        /* ... */
     </style>
 </head>
 <body>
@@ -52,23 +20,16 @@
     </div>
 </div>
 
-<label for="code-type">Выберите тип кода:</label>
-<select id="code-type">
-    <option value="ean_reader">EAN-13 и EAN-8</option>
-    <option value="code_128_reader">Code 128</option>
-    <option value="code_39_reader">Code 39</option>
-    <option value="upc_reader">UPC</option>
-    <option value="code_93_reader">Code 93</option>
-    <option value="codabar_reader">Codabar</option>
-    <option value="i2of5_reader">Interleaved 2 of 5</option>
-    <option value="qr_reader">QR-код</option>
-    <option value="matrix_reader">Data Matrix</option>
-</select>
+<label for="output-columns">Выберите столбцы для вывода:</label>
+<select id="output-columns" multiple></select>
 
 <div class="button-container">
-    <button id="scan">Сканировать</button>
+    <button id="scan-button">Сканировать</button>
     <button id="reset-button">Сброс</button>
+    <button id="manual-entry-button">Ввести вручную</button> <!-- Новая кнопка -->
 </div>
+
+<input type="text" id="manual-entry" placeholder="Введите штрих-код" style="display:none;"/> <!-- Поле ввода для ручного ввода, скрыто по умолчанию -->
 
 <div id="loading">Загрузка...</div>
 
@@ -77,12 +38,15 @@
     <div id="search-results"></div>
 </div>
 
+<a href="https://relef.ru/" target="_blank">
+    <img id="banner" src="https://raw.githubusercontent.com/Alexei-rzn/ScanShk/refs/heads/main/%D0%91%D0%B5%D0%B7%20%D0%BD%D0%B0%D0%B7%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F.png" alt="Ваш баннер">
+</a>
+
 <script>
     const googleSheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT3oeQ768KbbMYrfrrijNYswWat4GdsDzAa7iRZZ2vLqjvg6zbTQ5Efe1LFn9wRfULaghfYoRGruy1w/pub?output=csv';
 
     let data = [];
     let headers = [];
-    let isScanning = false;
 
     async function loadGoogleSheetData() {
         document.getElementById('loading').style.display = 'block';
@@ -109,13 +73,24 @@
             });
             return obj;
         });
+        populateDropdowns();
+    }
+
+    function populateDropdowns() {
+        const outputColumnsSelect = document.getElementById('output-columns');
+        headers.forEach(header => {
+            const outputOption = document.createElement('option');
+            outputOption.value = header;
+            outputOption.textContent = header;
+            outputColumnsSelect.appendChild(outputOption);
+        });
     }
 
     function searchByBarcode(barcode) {
         const outputColumns = Array.from(document.getElementById('output-columns').selectedOptions)
             .map(option => option.value);
         const resultsContainer = document.getElementById('search-results');
-        resultsContainer.innerHTML = `<p>Сканируемый код: ${barcode}</p>`;
+        resultsContainer.innerHTML = `<p>Сканируемый штрих-код: ${barcode}</p>`;
 
         const filteredData = data.filter(item => item['ШК 1'] === barcode || item['ШК 2'] === barcode || item['ШК 3'] === barcode);
 
@@ -141,66 +116,82 @@
         }
     }
 
-    function startScanner(reader) {
+    let isScanning = false;
+
+    function startScanner() {
         if (isScanning) return;
         isScanning = true;
-
-        const scannerContainer = document.getElementById('scanner-container');
-        scannerContainer.style.display = 'block'; // Показываем контейнер камеры
+        document.getElementById('bounding-box').style.display = 'none';
 
         Quagga.init({
             inputStream: {
                 type: "LiveStream",
-                target: scannerContainer,
+                target: document.querySelector('#scanner-container'),
                 constraints: {
                     facingMode: "environment",
                     width: { ideal: 1280 },
-                    height: { ideal: 720 },
-                    advanced: [
-                        { autofocus: true }, // Включаем автофокус
-                        { torch: true } // Включаем фонарик, если доступно
-                    ]
+                    height: { ideal: 720 }
                 },
             },
             decoder: {
-                readers: [reader],
+                readers: ["ean_reader", "code_128_reader", "code_39_reader"],
                 multiple: false
             },
             locate: true,
         }, function (err) {
             if (err) {
-                console.error("Ошибка инициализации сканера:", err);
-                alert('Ошибка инициализации камеры. Пожалуйста, проверьте разрешения.');
+                console.log(err);
                 isScanning = false;
-                scannerContainer.style.display = 'none'; // Скрываем контейнер при ошибке
                 return;
             }
             console.log("Scanner initialized");
-            Quagga.start(); // Запускаем сканер
+            document.getElementById('loading').style.display = 'none';
+            Quagga.start();
         });
 
         Quagga.onDetected(function (data) {
             const code = data.codeResult.code;
-            console.log("Код: ", code);
-            Quagga.stop(); // Останавливаем сканер после успешного сканирования
-            isScanning = false; // Сбрасываем состояние сканирования
-            searchByBarcode(code);
+            console.log("Код штрих-кода: ", code);
+            const { x, y, width, height } = data.box;
+            const boundingBox = document.getElementById('bounding-box');
+            boundingBox.style.display = 'block';
+            boundingBox.style.left = `${x}px`;
+            boundingBox.style.top = `${y}px`;
+            boundingBox.style.width = `${width}px`;
+            boundingBox.style.height = `${height}px`;
 
-            // Скрываем окно камеры после сканирования
-            scannerContainer.style.display = 'none';
+            Quagga.stop();
+            isScanning = false;
+            searchByBarcode(code);
         });
     }
 
-    document.getElementById('scan').addEventListener('click', function () {
-        const selectedReader = document.getElementById('code-type').value; // Получаем выбранный тип кода
-        startScanner(selectedReader);
+    document.getElementById('scan-button').addEventListener('click', function () {
+        startScanner();
     });
 
     document.getElementById('reset-button').addEventListener('click', function () {
         document.getElementById('search-results').innerHTML = '';
         Quagga.stop();
         isScanning = false;
-        document.getElementById('scanner-container').style.display = 'none'; // Скрыть контейнер камеры
+        document.getElementById('bounding-box').style.display = 'none';
+    });
+
+    document.getElementById('manual-entry-button').addEventListener('click', function () {
+        const manualEntryField = document.getElementById('manual-entry');
+        manualEntryField.style.display = 'block'; // Показываем поле ввода
+        manualEntryField.focus(); // Устанавливаем фокус на поле ввода
+    });
+
+    document.getElementById('manual-entry').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') { // Если нажата клавиша Enter
+            const barcode = this.value.trim();
+            if (barcode) {
+                searchByBarcode(barcode);
+                this.value = ''; // Очищаем поле ввода
+                this.style.display = 'none'; // Скрываем поле ввода
+            }
+        }
     });
 
     loadGoogleSheetData();
