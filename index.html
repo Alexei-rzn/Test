@@ -1,32 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode Scanner</title>
-    <script src="https://serratus.github.io/quaggaJS/examples/js/quagga.min.js"></script>
-    <style>
-        #interactive {
-            position: relative;
-            width: 100%;
-            height: 300px;
-        }
-        #barcode-result {
-            margin-top: 20px;
-        }
-    </style>
+    <title>2048 Игра</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Scan or Enter Barcode</h1>
-    <button id="start-scan">Start Scan</button>
-    <div id="interactive" class="viewport"></div>
+    <div id="grid-container">
+        <!-- Сетка для отображения плиток -->
+    </div>
+    <button id="undoButton">Отмена</button>
+    <button id="deleteTileButton">Удалить плитку</button>
 
-    <h3>Or enter barcode manually:</h3>
-    <input type="text" id="manual-barcode" placeholder="Enter barcode here">
-    <button id="submit-barcode">Submit</button>
-
-    <div id="barcode-result"></div>
-
-    <script src="app.js"></script>
+    <script src="game.js"></script>
+    <script src="controls.js"></script>
 </body>
 </html>
