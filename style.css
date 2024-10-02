@@ -1,0 +1,90 @@
+body {
+    background-color: #8cceff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+}
+.game-container {
+    text-align: center;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    width: 90vw;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.score-container, .balance-container {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 10px;
+}
+.restart-button {
+    font-size: 18px;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #f39c12;
+    color: white;
+}
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+.tile {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 32px;
+    border-radius: 5px;
+    color: white;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+.tile-2 { background-color: #4db6e4; }
+.tile-4 { background-color: #4db6e4; }
+.tile-8 { background-color: #6ee7d3; }
+.tile-16 { background-color: #68e4ca; }
+.tile-32 { background-color: #1bc4c7; }
+.tile-64 { background-color: #1ab1b2; }
+.tile-128 { background-color: #0095f8; }
+.tile-256 { background-color: #0077bb; }
+.tile-512 { background-color: #005e99; }
+.tile-1024 { background-color: #004577; }
+.tile-2048 { background-color: #003858; }
+.game-over {
+    font-size: 24px;
+    color: red;
+    margin-top: 20px;
+}
+.hidden {
+    display: none;
+}
+.button-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+.action-button {
+    font-size: 16px;
+    padding: 10px 15px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #3498db;
+    color: white;
+    flex: 1;
+    margin: 5px;
+}
+
