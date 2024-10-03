@@ -1,29 +1,32 @@
 body {
-    background-color: #8cceff;
+    background-color: #8cceff; /* Цвет фона */
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    margin: 0;
+    margin: 0; /* Убираем отступы по умолчанию */
     font-family: 'Arial', sans-serif;
 }
+
 .game-container {
     text-align: center;
     border-radius: 10px;
     padding: 20px;
-    background-color: #ffffff;
+    background-color: #ffffff; /* Цвет фона контейнера */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-    width: 90vw;
-    max-width: 400px;
+    width: 90vw; /* Ширина контейнера 90% от ширины экрана */
+    max-width: 400px; /* Максимальная ширина контейнера */
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: column; /* Вертикальное выравнивание */
+    align-items: center; /* Центрируем элементы по горизонтали */
 }
+
 .score-container, .balance-container {
     font-size: 24px;
     color: #333;
     margin-bottom: 10px;
 }
+
 .restart-button {
     font-size: 18px;
     padding: 10px 20px;
@@ -31,17 +34,19 @@ body {
     cursor: pointer;
     border: none;
     border-radius: 5px;
-    background-color: #f39c12;
+    background-color: #f39c12; /* Цвет кнопки */
     color: white;
 }
+
 .grid-container {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 10px;
 }
+
 .tile {
-    width: 80px;
-    height: 80px;
+    width: 80px; /* Ширина плитки */
+    height: 80px; /* Высота плитки */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -49,8 +54,9 @@ body {
     border-radius: 5px;
     color: white;
     text-align: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Тень для плиток */
 }
+
 .tile-2 { background-color: #4db6e4; }
 .tile-4 { background-color: #4db6e4; }
 .tile-8 { background-color: #6ee7d3; }
@@ -62,29 +68,32 @@ body {
 .tile-512 { background-color: #005e99; }
 .tile-1024 { background-color: #004577; }
 .tile-2048 { background-color: #003858; }
+
 .game-over {
     font-size: 24px;
     color: red;
     margin-top: 20px;
 }
+
 .hidden {
     display: none;
 }
+
 .button-container {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
+    flex-wrap: wrap; /* Позволяет кнопкам занимать свободное пространство */
+    justify-content: space-between; /* Равномерное распределение кнопок */
     margin-top: 20px;
 }
+
 .action-button {
     font-size: 16px;
     padding: 10px 15px;
     cursor: pointer;
     border: none;
     border-radius: 5px;
-    background-color: #3498db;
+    background-color: #3498db; /* Цвет кнопки */
     color: white;
-    flex: 1;
-    margin: 5px;
+    flex: 1; /* Кнопки занимают равное пространство */
+    margin: 5px; /* Отступы между кнопками */
 }
-
