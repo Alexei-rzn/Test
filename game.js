@@ -6,16 +6,17 @@ const gameOverDisplay = document.getElementById("game-over");
 let grid = [];
 let score = 0;
 let balance = 100;
+let history = [];
 
 // Инициализация игры
 function initGame() {
-    grid = Array.from({ length: 4 }, () => Array(4).fill(0));
-    score = 0;
-    balance = 100;
-    history = []; // Обнуляем историю
-    addNewTile();
-    addNewTile();
-    updateGameState();
+    grid = Array.from({ length: 4 }, () => Array(4).fill(0));  // Создаем пустое игровое поле
+    score = 0; 
+    balance = 100; 
+    history = [];  // Обнуляем историю
+    addNewTile(); // Добавляем первую плитку
+    addNewTile(); // Добавляем вторую плитку
+    updateGrid(); // Обновляем отображение
 }
 
 // Добавление новой плитки
@@ -29,6 +30,7 @@ function addNewTile() {
     if (emptyCells.length) {
         const { i, j } = emptyCells[Math.floor(Math.random() * emptyCells.length)];
         grid[i][j] = Math.random() < 0.8 ? 2 : 4; // 80% вероятность 2, 20% - 4
+        saveState(); // Сохраняем состояние после добавления новой плитки
     }
 }
 
@@ -113,8 +115,8 @@ function move(direction) {
 
     if (moved || combined) {
         setTimeout(() => {
-            addNewTile();
-            updateGrid();
+            addNewTile(); // Добавляем новую плитку после хода
+            updateGrid(); // Обновляем интерфейс
         }, 200);
     }
 }
@@ -189,6 +191,14 @@ function slideColumn(column, direction) {
     }
 
     return { newColumn, moved, combined };
+}
+
+// Сохранение состояния игры в истории
+function saveState() {
+    if (history.length >= 10) {
+        history.shift(); // Удаляем самый старый элемент, если их стало больше 10
+    }
+    history.push(JSON.parse(JSON.stringify(grid))); // Сохраняем текущее состояние игры
 }
 
 // Сенсорное управление
