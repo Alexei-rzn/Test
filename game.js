@@ -6,17 +6,16 @@ const gameOverDisplay = document.getElementById("game-over");
 let grid = [];
 let score = 0;
 let balance = 100;
-let history = [];
 
 // Инициализация игры
 function initGame() {
     grid = Array.from({ length: 4 }, () => Array(4).fill(0));
     score = 0;
     balance = 100;
-    history = [];
+    history = []; // Обнуляем историю
     addNewTile();
     addNewTile();
-    updateGrid();
+    updateGameState();
 }
 
 // Добавление новой плитки
@@ -68,8 +67,6 @@ function move(direction) {
     let moved = false;
     let combined = false;
 
-    const slideFunction = direction === 'up' ? slideColumn : (direction === 'down' ? slideColumn : slideRow);
-    
     switch (direction) {
         case 'left':
             for (let i = 0; i < 4; i++) {
@@ -194,7 +191,7 @@ function slideColumn(column, direction) {
     return { newColumn, moved, combined };
 }
 
-// Обработка сенсорного ввода
+// Сенсорное управление
 let touchStartX = 0;
 let touchStartY = 0;
 
@@ -232,4 +229,4 @@ gridContainer.addEventListener('touchend', (event) => {
     }
 });
 
-initGame();
+initGame(); // Начало игры
