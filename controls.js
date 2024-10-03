@@ -8,24 +8,51 @@ let deleteMode = false;
 
 // Ход назад
 undoButton.addEventListener("click", () => {
-    if (history.length > 0 && balance >= 25) {
+    if (history.length > 0 && balance >= 30) {
         grid = history.pop();  // Восстанавливаем последнее состояние
-        balance -= 25;  // Списываем 25 баллов
+        balance -= 30;  // Списываем 30 баллов
         updateGrid();
     }
 });
 
 // Удаление плитки
-deleteTileButton.addEventListener("click", () => {
-    grid.forEach((row, rowIndex) => {
-        row.forEach((tile, tileIndex) => {
-            if (tile > 0) { 
-                grid[rowIndex][tileIndex] = 0; // Удаляем плитку
-            }
+function deleteTile() {
+    if (balance >= 50) {
+        const tiles = document.querySelectorAll(".tile");
+        tiles.forEach(tile => {
+            tile.addEventListener("click", () => {
+                const tileValue = parseInt(tile.innerText);
+                if (tileValue > 0) {
+                    tile.innerText = ''; // Удаляем плитку
+                    const [rowIndex, colIndex] = getTileIndex(tile);
+                    grid[rowIndex][colIndex] = 0; // Обновляем игровое состояние
+                    balance -= 50; // Списываем 50
+                    updateGrid();
+                }
+            });
         });
-    });
-    updateGrid();
+    }
+}
+
+// Показать и скрыть режим удаления плиток
+deleteTileButton.addEventListener("mousedown", () => {
+    deleteTileButton.classList.add("active");
+    deleteMode = true;
+    deleteTile();
 });
+
+deleteTileButton.addEventListener("mouseup", () => {
+    deleteTileButton.classList.remove("active");
+    deleteMode = false;
+});
+
+// Логика получения индекса плитки
+function getTileIndex(tile) {
+    const index = Array.from(tile.parentNode.children).indexOf(tile);
+    const rowIndex = Math.floor(index / 4);
+    const colIndex = index % 4;
+    return [rowIndex, colIndex];
+}
 
 // Перемешивание плиток
 shuffleButton.addEventListener("click", () => {
