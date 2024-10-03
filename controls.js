@@ -5,6 +5,15 @@ const addFundsButton = document.getElementById("add-funds");
 const restartButton = document.getElementById("restart");
 
 let deleteMode = false;
+let history = [];
+
+// Функция для сохранения состояния игры в истории
+function saveState() {
+    if (history.length >= 10) {
+        history.shift(); // Удаляем самый старый элемент, если их стало больше 10
+    }
+    history.push(JSON.parse(JSON.stringify(grid))); // Сохраняем текущее состояние игры
+}
 
 // Ход назад
 undoButton.addEventListener("click", () => {
@@ -23,9 +32,9 @@ function deleteTile() {
             tile.addEventListener("click", () => {
                 const tileValue = parseInt(tile.innerText);
                 if (tileValue > 0) {
-                    tile.innerText = ''; // Удаляем плитку
                     const [rowIndex, colIndex] = getTileIndex(tile);
                     grid[rowIndex][colIndex] = 0; // Обновляем игровое состояние
+                    tile.innerText = ''; // Удаляем плитку
                     balance -= 50; // Списываем 50
                     updateGrid();
                 }
@@ -83,3 +92,32 @@ restartButton.addEventListener("click", () => {
     gameOverDisplay.classList.add("hidden");
     initGame();
 });
+
+// Вызываем saveState после каждого изменения состояния
+function updateGameState() {
+    saveState(); // Сохранение состояния перед обновлением
+    updateGrid();
+}
+
+// Обновляем состояние игры, когда происходит изменение
+function initGame() {
+    grid = Array.from({ length: 4 }, () => Array(4).fill(0));
+    score = 0;
+    balance = 100;
+    history = []; // Обнуляем историю
+    addNewTile();
+    addNewTile();
+    updateGameState(); // Обновляем состояние и отображение
+}
+
+function move(direction) {
+    // Допишите сюда вашу логику движения, добавив вызов updateGameState() в конце.
+    // Например:
+  
+    // Если были изменения в игре:
+    if (moved || combined) {
+        updateGameState(); // Обновление состояния игры
+    }
+}
+
+// Убедитесь, что функции, которые изменяют игру, также вызывают updateGameState()
