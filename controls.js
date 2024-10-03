@@ -5,15 +5,6 @@ const addFundsButton = document.getElementById("add-funds");
 const restartButton = document.getElementById("restart");
 
 let deleteMode = false;
-let history = []; // Инициализация истории, её нужно будет обрабатывать в game.js
-
-// Функция для сохранения состояния игры в истории
-function saveState() {
-    if (history.length >= 10) {
-        history.shift(); // Удаляем самый старый элемент, если их стало больше 10
-    }
-    history.push(JSON.parse(JSON.stringify(grid))); // Сохраняем текущее состояние игры
-}
 
 // Ход назад
 undoButton.addEventListener("click", () => {
@@ -33,10 +24,13 @@ function deleteTile() {
                 const tileValue = parseInt(tile.innerText);
                 if (tileValue > 0) {
                     const [rowIndex, colIndex] = getTileIndex(tile);
-                    grid[rowIndex][colIndex] = 0; // Обновляем игровое состояние
-                    tile.innerText = ''; // Удаляем плитку
+                    grid[rowIndex][colIndex] = 0; // Удаляем плитку
+                    tile.innerText = ''; // Обновляем интерфейс
                     balance -= 50; // Списываем 50
                     updateGrid(); // Обновление интерфейса
+
+                    // Сохраняем состояние после удаления
+                    saveState(); 
                 }
             }, { once: true });
         });
@@ -69,6 +63,9 @@ shuffleButton.addEventListener("click", () => {
         shuffleTiles();
         balance -= 20;
         updateGrid(); // Обновление интерфейса
+
+        // Сохраняем состояние после перемешивания
+        saveState();
     }
 });
 
@@ -93,8 +90,10 @@ restartButton.addEventListener("click", () => {
     initGame(); // Инициализация новой игры
 });
 
-// Вызываем saveState после каждого изменения состояния
-function updateGameState() {
-    saveState(); // Сохраняем текущее состояние игры
-    updateGrid(); // Обновляем интерфейс
+// Сохранение состояния игры в истории
+function saveState() {
+    if (history.length >= 10) {
+        history.shift(); // Удаляем самый старый элемент, если их стало больше 10
     }
+    history.push(JSON.parse(JSON.stringify(grid))); // Сохраняем текущее состояние игры
+}
