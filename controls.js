@@ -5,13 +5,22 @@ const addFundsButton = document.getElementById("add-funds");
 const restartButton = document.getElementById("restart");
 
 let deleteMode = false;
+let history = []; // Инициализация истории, её нужно будет обрабатывать в game.js
+
+// Функция для сохранения состояния игры в истории
+function saveState() {
+    if (history.length >= 10) {
+        history.shift(); // Удаляем самый старый элемент, если их стало больше 10
+    }
+    history.push(JSON.parse(JSON.stringify(grid))); // Сохраняем текущее состояние игры
+}
 
 // Ход назад
 undoButton.addEventListener("click", () => {
     if (history.length > 0 && balance >= 30) {
         grid = history.pop();  // Восстанавливаем последнее состояние
         balance -= 30;  // Списываем 30 баллов
-        updateGrid();
+        updateGrid(); // Обновление интерфейса
     }
 });
 
@@ -23,13 +32,13 @@ function deleteTile() {
             tile.addEventListener("click", () => {
                 const tileValue = parseInt(tile.innerText);
                 if (tileValue > 0) {
-                    tile.innerText = ''; // Удаляем плитку
                     const [rowIndex, colIndex] = getTileIndex(tile);
                     grid[rowIndex][colIndex] = 0; // Обновляем игровое состояние
+                    tile.innerText = ''; // Удаляем плитку
                     balance -= 50; // Списываем 50
-                    updateGrid();
+                    updateGrid(); // Обновление интерфейса
                 }
-            });
+            }, { once: true });
         });
     }
 }
@@ -59,7 +68,7 @@ shuffleButton.addEventListener("click", () => {
     if (balance >= 20) {
         shuffleTiles();
         balance -= 20;
-        updateGrid();
+        updateGrid(); // Обновление интерфейса
     }
 });
 
@@ -75,11 +84,17 @@ function shuffleTiles() {
 // Пополнение баланса
 addFundsButton.addEventListener("click", () => {
     balance += 50;
-    updateGrid();
+    updateGrid(); // Обновление интерфейса
 });
 
 // Перезапуск игры
 restartButton.addEventListener("click", () => {
     gameOverDisplay.classList.add("hidden");
-    initGame();
+    initGame(); // Инициализация новой игры
 });
+
+// Вызываем saveState после каждого изменения состояния
+function updateGameState() {
+    saveState(); // Сохраняем текущее состояние игры
+    updateGrid(); // Обновляем интерфейс
+    }
