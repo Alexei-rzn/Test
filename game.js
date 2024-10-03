@@ -1,128 +1,197 @@
-// Размер поля 4x4
-const size = 4;
+const gridContainer = document.getElementById("grid-container");
+const scoreDisplay = document.getElementById("score");
+const balanceDisplay = document.getElementById("balance");
+const gameOverDisplay = document.getElementById("game-over");
+
 let grid = [];
 let score = 0;
 let balance = 100;
+let history = [];
 
-// Инициализация игрового поля
+// Инициализация игры
 function initGame() {
-    grid = Array(size).fill().map(() => Array(size).fill(0)); // Пустая сетка 4x4
+    grid = Array.from({ length: 4 }, () => Array(4).fill(0));
     score = 0;
     balance = 100;
-    addRandomTile();
-    addRandomTile();
+    history = [];
+    addNewTile();
+    addNewTile();
     updateGrid();
-    updateScore();
-    updateBalance();
 }
 
-// Добавление новой плитки в случайное свободное место
-function addRandomTile() {
-    let emptyTiles = [];
-    for (let r = 0; r < size; r++) {
-        for (let c = 0; c < size; c++) {
-            if (grid[r][c] === 0) emptyTiles.push([r, c]);
+// Добавление новой плитки
+function addNewTile() {
+    let emptyCells = [];
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+            if (grid[i][j] === 0) emptyCells.push({ i, j });
         }
     }
-    if (emptyTiles.length > 0) {
-        let [row, col] = emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
-        grid[row][col] = Math.random() > 0.9 ? 4 : 2;
+    if (emptyCells.length) {
+        const { i, j } = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        grid[i][j] = Math.random() < 0.8 ? 2 : 4; // 80% вероятность 2, 20% - 4
     }
 }
 
-// Обновление сетки на странице
+// Обновление отображения плиток на экране
 function updateGrid() {
-    const container = document.getElementById('grid-container');
-    container.innerHTML = ''; // Очистка перед обновлением
+    gridContainer.innerHTML = '';
+    grid.forEach(row => {
+        row.forEach(tile => {
+            const tileElement = document.createElement("div");
+            tileElement.classList.add("tile");
+            if (tile > 0) {
+                tileElement.classList.add(`tile-${tile}`);
+                tileElement.innerText = tile;
+            }
+            gridContainer.appendChild(tileElement);
+        });
+    });
+    scoreDisplay.innerText = score;
+    balanceDisplay.innerText = balance;
 
-    for (let r = 0; r < size; r++) {
-        for (let c = 0; c < size; c++) {
-            const tile = document.createElement('div');
-            tile.classList.add('tile');
-            tile.innerText = grid[r][c] === 0 ? '' : grid[r][c];
-            container.appendChild(tile);
-        }
+    if (checkGameOver()) {
+        gameOverDisplay.classList.remove("hidden");
     }
 }
 
-// Обновление счёта
-function updateScore() {
-    document.getElementById('score').innerText = score;
+// Проверка на окончание игры
+function checkGameOver() {
+    return grid.flat().every(cell => cell !== 0) &&
+        !grid.some((row, i) => row.some((cell, j) => 
+            (j < 3 && cell === row[j + 1]) || (i < 3 && cell === grid[i + 1][j])
+        ));
 }
 
-// Обновление баланса
-function updateBalance() {
-    document.getElementById('balance').innerText = balance;
+// Логика сдвига плиток
+function move(direction) {
+    let moved = false;
+    let combined = false;
+
+    const slideFunction = direction === 'up' ? slideColumn : (direction === 'down' ? slideColumn : slideRow);
+    
+    switch (direction) {
+        case 'left':
+            for (let i = 0; i < 4; i++) {
+                const result = slideRow(grid[i], direction);
+                if (result.moved) moved = true;
+                if (result.combined) combined = true;
+                grid[i] = result.newRow;
+            }
+            break;
+
+        case 'right':
+            for (let i = 0; i < 4; i++) {
+                const result = slideRow(grid[i].slice().reverse(), 'left');
+                if (result.moved) moved = true;
+                if (result.combined) combined = true;
+                grid[i] = result.newRow.reverse();
+            }
+            break;
+
+        case 'up':
+            for (let j = 0; j < 4; j++) {
+                const column = [grid[0][j], grid[1][j], grid[2][j], grid[3][j]];
+                const result = slideColumn(column, 'up');
+                for (let i = 0; i < 4; i++) {
+                    grid[i][j] = result.newColumn[i];
+                }
+                if (result.moved) moved = true;
+                if (result.combined) combined = true;
+            }
+            break;
+
+        case 'down':
+            for (let j = 0; j < 4; j++) {
+                const column = [grid[0][j], grid[1][j], grid[2][j], grid[3][j]];
+                const result = slideColumn(column, 'down');
+                for (let i = 0; i < 4; i++) {
+                    grid[i][j] = result.newColumn[i];
+                }
+                if (result.moved) moved = true;
+                if (result.combined) combined = true;
+            }
+            break;
+    }
+
+    if (moved || combined) {
+        setTimeout(() => {
+            addNewTile();
+            updateGrid();
+        }, 200);
+    }
 }
 
-// Начало новой игры
-document.getElementById('restart').addEventListener('click', initGame);
+// Логика сдвига плиток в строке
+function slideRow(row, direction) {
+    let newRow = row.filter(value => value);
+    const emptySpaces = 4 - newRow.length;
+    let moved = false;
+    let combined = false;
 
-// Сенсорное управление (swipe)
-let touchStartX = 0;
-let touchStartY = 0;
+    newRow = direction === 'left' 
+        ? [...newRow, ...Array(emptySpaces).fill(0)] 
+        : [...Array(emptySpaces).fill(0), ...newRow];
 
-document.addEventListener('touchstart', function(event) {
-    touchStartX = event.touches[0].clientX;
-    touchStartY = event.touches[0].clientY;
-});
-
-document.addEventListener('touchend', function(event) {
-    const touchEndX = event.changedTouches[0].clientX;
-    const touchEndY = event.changedTouches[0].clientY;
-    handleSwipe(touchStartX, touchStartY, touchEndX, touchEndY);
-});
-
-function handleSwipe(startX, startY, endX, endY) {
-    const deltaX = endX - startX;
-    const deltaY = endY - startY;
-
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        if (deltaX > 0) {
-            moveRight();
-        } else {
-            moveLeft();
-        }
-    } else {
-        if (deltaY > 0) {
-            moveDown();
-        } else {
-            moveUp();
+    for (let i = 0; i < 3; i++) {
+        if (newRow[i] !== 0 && newRow[i] === newRow[i + 1]) {
+            newRow[i] *= 2;
+            score += newRow[i];
+            newRow[i + 1] = 0;
+            combined = true;
         }
     }
-    updateGrid();
-    checkGameOver();
+
+    if (JSON.stringify(newRow) !== JSON.stringify(row)) {
+        moved = true;
+    }
+
+    newRow = newRow.filter(value => value);
+    while (newRow.length < 4) newRow.push(0);
+
+    return { newRow, moved, combined };
 }
 
-// Логика движения (упрощённо)
-function moveRight() {
-    for (let r = 0; r < size; r++) {
-        for (let c = size - 2; c >= 0; c--) {
-            if (grid[r][c] !== 0 && grid[r][c + 1] === 0) {
-                grid[r][c + 1] = grid[r][c];
-                grid[r][c] = 0;
+// Логика сдвига плиток в колонне
+function slideColumn(column, direction) {
+    let newColumn = column.filter(value => value);
+    let moved = false;
+    let combined = false;
+
+    while (newColumn.length < 4) {
+        direction === 'up' ? newColumn.push(0) : newColumn.unshift(0);
+    }
+
+    if (direction === 'up') {
+        for (let i = 0; i < 3; i++) {
+            if (newColumn[i] !== 0 && newColumn[i] === newColumn[i + 1]) {
+                newColumn[i] *= 2;
+                score += newColumn[i];
+                newColumn[i + 1] = 0;
+                combined = true;
+            }
+        }
+    } else { // down
+        for (let i = 3; i > 0; i--) {
+            if (newColumn[i] !== 0 && newColumn[i] === newColumn[i - 1]) {
+                newColumn[i] *= 2;
+                score += newColumn[i];
+                newColumn[i - 1] = 0;
+                combined = true;
             }
         }
     }
+
+    if (JSON.stringify(newColumn) !== JSON.stringify(column)) {
+        moved = true;
+    }
+
+    newColumn = newColumn.filter(value => value);
+    while (newColumn.length < 4) {
+        direction === 'up' ? newColumn.push(0) : newColumn.unshift(0);
+    }
+
+    return { newColumn, moved, combined };
 }
 
-// Аналогично для других направлений
-function moveLeft() {
-    // Логика для движения влево
-}
-
-function moveUp() {
-    // Логика для движения вверх
-}
-
-function moveDown() {
-    // Логика для движения вниз
-}
-
-// Проверка конца игры
-function checkGameOver() {
-    // Логика проверки, если нет доступных ходов
-}
-
-// Инициализация игры при загрузке страницы
 initGame();
