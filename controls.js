@@ -38,7 +38,7 @@ function deleteTile() {
                     balance -= 50; // Списываем 50
                     updateGrid();
                 }
-            }, { once: true }); // С помощью once: true убираем обработчик после первого клика
+            });
         });
     }
 }
@@ -93,13 +93,13 @@ restartButton.addEventListener("click", () => {
     initGame();
 });
 
-// Обновляем состояние игры и сохраняем
+// Вызываем saveState после каждого изменения состояния
 function updateGameState() {
-    saveState(); // Сохраняем текущее состояние игры
-    updateGrid(); // Обновляем графику
+    saveState(); // Сохранение состояния перед обновлением
+    updateGrid();
 }
 
-// Обновление состояния игры, когда происходит изменение
+// Обновляем состояние игры, когда происходит изменение
 function initGame() {
     grid = Array.from({ length: 4 }, () => Array(4).fill(0));
     score = 0;
@@ -110,60 +110,14 @@ function initGame() {
     updateGameState(); // Обновляем состояние и отображение
 }
 
-// Обновляем состояние игры при перемещении плиток
 function move(direction) {
-    let moved = false;
-    let combined = false;
-
-    const slideFunction = direction === 'up' ? slideColumn : (direction === 'down' ? slideColumn : slideRow);
-    
-    switch (direction) {
-        // Обработка движения плиток
-        case 'left':
-            for (let i = 0; i < 4; i++) {
-                const result = slideRow(grid[i], direction);
-                if (result.moved) moved = true;
-                if (result.combined) combined = true;
-                grid[i] = result.newRow;
-            }
-            break;
-
-        case 'right':
-            for (let i = 0; i < 4; i++) {
-                const result = slideRow(grid[i].slice().reverse(), 'left');
-                if (result.moved) moved = true;
-                if (result.combined) combined = true;
-                grid[i] = result.newRow.reverse();
-            }
-            break;
-
-        case 'up':
-            for (let j = 0; j < 4; j++) {
-                const column = [grid[0][j], grid[1][j], grid[2][j], grid[3][j]];
-                const result = slideColumn(column, 'up');
-                for (let i = 0; i < 4; i++) {
-                    grid[i][j] = result.newColumn[i];
-                }
-                if (result.moved) moved = true;
-                if (result.combined) combined = true;
-            }
-            break;
-
-        case 'down':
-            for (let j = 0; j < 4; j++) {
-                const column = [grid[0][j], grid[1][j], grid[2][j], grid[3][j]];
-                const result = slideColumn(column, 'down');
-                for (let i = 0; i < 4; i++) {
-                    grid[i][j] = result.newColumn[i];
-                }
-                if (result.moved) moved = true;
-                if (result.combined) combined = true;
-            }
-            break;
-    }
-
-    // Если было движение или объединение
+    // Допишите сюда вашу логику движения, добавив вызов updateGameState() в конце.
+    // Например:
+  
+    // Если были изменения в игре:
     if (moved || combined) {
-        updateGameState(); // Обновление состояния при изменении
+        updateGameState(); // Обновление состояния игры
     }
 }
+
+// Убедитесь, что функции, которые изменяют игру, также вызывают updateGameState()
