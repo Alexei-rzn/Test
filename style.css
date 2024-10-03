@@ -96,4 +96,9 @@ body {
     color: white;
     flex: 1; /* Кнопки занимают равное пространство */
     margin: 5px; /* Отступы между кнопками */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+}
+
+.action-button.active {
+    background-color: lightcoral; /* Цвет кнопки при активном состоянии */
 }
